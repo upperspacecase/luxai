@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxAI &mdash; AI Implementation Consulting</title>
+    <style>
+        :root {
+            --bg: #fafafa;
+            --fg: #111;
+            --muted: #555;
+            --accent: #1a1a1a;
+            --border: #e0e0e0;
+            --max-w: 680px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+        }
+
+        /* Header */
+        header { margin-bottom: 4rem; }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        header p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        /* Sections */
+        section { margin-bottom: 3.5rem; }
+
+        section h2 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        section p {
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Stats row */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        /* Services list */
+        .services {
+            list-style: none;
+        }
+
+        .services li {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .services li:first-child {
+            border-top: 1px solid var(--border);
+        }
+
+        .service-name {
+            font-weight: 500;
+            font-size: 1.05rem;
+        }
+
+        .service-detail {
+            color: var(--muted);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* CTA */
+        .cta-section {
+            background: var(--accent);
+            color: #fff;
+            padding: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .cta-section h2 {
+            color: rgba(255,255,255,0.5);
+            border-bottom-color: rgba(255,255,255,0.15);
+        }
+
+        .cta-section p {
+            color: rgba(255,255,255,0.85);
+        }
+
+        .cta-section a {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .stats { grid-template-columns: 1fr; gap: 1rem; }
+            .services li { flex-direction: column; gap: 0.25rem; }
+            .container { padding: 2.5rem 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LuxAI</h1>
+            <p>AI implementation consulting for organizations ready to close the gap between AI investment and AI results.</p>
+        </header>
+
+        <section>
+            <h2>The Problem</h2>
+            <p>Organizations are spending aggressively on AI but failing to see returns. The gap between capability and deployment is the defining economic challenge of 2026.</p>
+            <div class="stats">
+                <div>
+                    <div class="stat-number">56%</div>
+                    <div class="stat-label">of CEOs report getting nothing out of AI investments</div>
+                </div>
+                <div>
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">enterprise failure rate for generative AI deployments</div>
+                </div>
+                <div>
+                    <div class="stat-number">80%</div>
+                    <div class="stat-label">of executives see no impact on employment or productivity</div>
+                </div>
+            </div>
+            <p>Replacing a steam engine with an electric motor changes nothing if the factory floor stays the same. AI transformation requires rethinking people, process, and systems together.</p>
+        </section>
+
+        <section>
+            <h2>Services</h2>
+            <ul class="services">
+                <li>
+                    <span class="service-name">AI Strategy for Leadership</span>
+                    <span class="service-detail">C-suite &amp; board advisory</span>
+                </li>
+                <li>
+                    <span class="service-name">Implementation &amp; Deployment</span>
+                    <span class="service-detail">Proof of concept to production</span>
+                </li>
+                <li>
+                    <span class="service-name">Agent Orchestration &amp; Context Engineering</span>
+                    <span class="service-detail">Architecture &amp; integration</span>
+                </li>
+                <li>
+                    <span class="service-name">AI Governance &amp; Compliance</span>
+                    <span class="service-detail">EU AI Act &amp; risk frameworks</span>
+                </li>
+                <li>
+                    <span class="service-name">MLOps &amp; Production Systems</span>
+                    <span class="service-detail">Reliability &amp; scale</span>
+                </li>
+                <li>
+                    <span class="service-name">Domain-Specific AI</span>
+                    <span class="service-detail">Healthcare, finance, legal, supply chain</span>
+                </li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Approach</h2>
+            <p>We work on outcomes, not hours. Our engagements are scoped to deliver measurable results&mdash;reduced costs, faster processes, new capabilities&mdash;with pricing aligned to the value created.</p>
+            <p>Every engagement starts with a focused diagnostic: where AI can create the most impact in your specific context, what's blocking deployment, and the fastest path to production value.</p>
+        </section>
+
+        <div class="cta-section">
+            <h2>Start a Conversation</h2>
+            <p>If your AI investments aren't delivering, the problem is almost certainly implementation, not technology. Reach out to discuss where you are and what's possible.</p>
+            <p style="margin-top: 1rem;"><a href="mailto:hello@luxai.com">hello@luxai.com</a></p>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 LuxAI. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
