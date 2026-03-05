@@ -85,33 +85,67 @@
             line-height: 1.4;
         }
 
-        /* Services list */
-        .services {
+        /* Services */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+
+        .two-col h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .two-col p {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        /* Use cases */
+        .use-cases {
             list-style: none;
         }
 
-        .services li {
-            padding: 1rem 0;
+        .use-cases li {
+            padding: 1.25rem 0;
             border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 1rem;
         }
 
-        .services li:first-child {
+        .use-cases li:first-child {
             border-top: 1px solid var(--border);
         }
 
-        .service-name {
+        .use-case-title {
             font-weight: 500;
             font-size: 1.05rem;
+            margin-bottom: 0.25rem;
         }
 
-        .service-detail {
+        .use-case-desc {
+            font-size: 0.92rem;
             color: var(--muted);
-            font-size: 0.85rem;
-            white-space: nowrap;
+        }
+
+        /* Contact links */
+        .contact-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .contact-links a {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.4);
+            padding-bottom: 2px;
+        }
+
+        .contact-links a:hover {
+            border-bottom-color: #fff;
         }
 
         /* CTA */
@@ -148,7 +182,7 @@
         /* Responsive */
         @media (max-width: 500px) {
             .stats { grid-template-columns: 1fr; gap: 1rem; }
-            .services li { flex-direction: column; gap: 0.25rem; }
+            .two-col { grid-template-columns: 1fr; gap: 1.5rem; }
             .container { padding: 2.5rem 1.25rem; }
         }
     </style>
@@ -181,45 +215,58 @@
         </section>
 
         <section>
-            <h2>Services</h2>
-            <ul class="services">
+            <h2>What We Do</h2>
+            <div class="two-col">
+                <div>
+                    <h3>Advisory</h3>
+                    <p>AI strategy for leadership teams. Where to invest, what to build vs. buy, how to restructure operations around AI capabilities, and how to navigate governance and compliance.</p>
+                </div>
+                <div>
+                    <h3>Implementation</h3>
+                    <p>Hands-on deployment from proof of concept to production. Agent orchestration, context engineering, MLOps, and the organizational change required to make AI actually work.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Use Cases</h2>
+            <ul class="use-cases">
                 <li>
-                    <span class="service-name">AI Strategy for Leadership</span>
-                    <span class="service-detail">C-suite &amp; board advisory</span>
+                    <div class="use-case-title">Supply Chain + AI</div>
+                    <div class="use-case-desc">Demand forecasting, inventory optimization, and autonomous procurement agents that reduce carrying costs and stockouts.</div>
                 </li>
                 <li>
-                    <span class="service-name">Implementation &amp; Deployment</span>
-                    <span class="service-detail">Proof of concept to production</span>
+                    <div class="use-case-title">Healthcare + AI</div>
+                    <div class="use-case-desc">Clinical workflow automation, diagnostic support systems, and compliance frameworks for regulated AI in patient care.</div>
                 </li>
                 <li>
-                    <span class="service-name">Agent Orchestration &amp; Context Engineering</span>
-                    <span class="service-detail">Architecture &amp; integration</span>
+                    <div class="use-case-title">Financial Services + AI</div>
+                    <div class="use-case-desc">Risk modeling, fraud detection, automated underwriting, and AI governance that satisfies regulators.</div>
                 </li>
                 <li>
-                    <span class="service-name">AI Governance &amp; Compliance</span>
-                    <span class="service-detail">EU AI Act &amp; risk frameworks</span>
+                    <div class="use-case-title">Legal + AI</div>
+                    <div class="use-case-desc">Contract analysis, due diligence automation, and document intelligence that reduces review cycles from weeks to hours.</div>
                 </li>
                 <li>
-                    <span class="service-name">MLOps &amp; Production Systems</span>
-                    <span class="service-detail">Reliability &amp; scale</span>
-                </li>
-                <li>
-                    <span class="service-name">Domain-Specific AI</span>
-                    <span class="service-detail">Healthcare, finance, legal, supply chain</span>
+                    <div class="use-case-title">AI Governance &amp; EU AI Act Readiness</div>
+                    <div class="use-case-desc">Risk classification, compliance documentation, and governance frameworks ahead of enforcement in August 2026.</div>
                 </li>
             </ul>
         </section>
 
         <section>
             <h2>Approach</h2>
-            <p>We work on outcomes, not hours. Our engagements are scoped to deliver measurable results&mdash;reduced costs, faster processes, new capabilities&mdash;with pricing aligned to the value created.</p>
-            <p>Every engagement starts with a focused diagnostic: where AI can create the most impact in your specific context, what's blocking deployment, and the fastest path to production value.</p>
+            <p>We work on outcomes, not hours. Pricing is aligned to the value created&mdash;measured in cost savings, speed gains, or new capabilities delivered.</p>
+            <p>Every engagement starts with a focused diagnostic: where AI creates the most impact in your context, what's blocking deployment, and the fastest path to production value.</p>
         </section>
 
         <div class="cta-section">
             <h2>Start a Conversation</h2>
-            <p>If your AI investments aren't delivering, the problem is almost certainly implementation, not technology. Reach out to discuss where you are and what's possible.</p>
-            <p style="margin-top: 1rem;"><a href="mailto:hello@luxai.com">hello@luxai.com</a></p>
+            <p>If your AI investments aren't delivering, the problem is almost certainly implementation, not technology. Let's talk about where you are and what's possible.</p>
+            <div class="contact-links">
+                <a href="https://wa.me/1XXXXXXXXXX">WhatsApp</a>
+                <a href="https://t.me/luxai">Telegram</a>
+            </div>
         </div>
 
         <footer>
