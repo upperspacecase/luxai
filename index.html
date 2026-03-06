@@ -3,275 +3,1511 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuxAI &mdash; AI Implementation Consulting</title>
+    <title>LuxAI — Your Secret Weapon for the AI Revolution</title>
+    <meta name="description" content="AI Venture Studio. Advisory. Implementation. We build with AI daily so you don't fall behind.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
-            --bg: #fafafa;
-            --fg: #111;
-            --muted: #555;
-            --accent: #1a1a1a;
-            --border: #e0e0e0;
-            --max-w: 680px;
+            --bg: #050508;
+            --surface: #0a0a10;
+            --surface-2: #111119;
+            --border: rgba(255,255,255,0.06);
+            --text: #e8e8f0;
+            --text-muted: #6b6b80;
+            --accent: #7c5cfc;
+            --accent-2: #00e5ff;
+            --accent-3: #ff3cac;
+            --glow: rgba(124,92,252,0.15);
+            --glow-2: rgba(0,229,255,0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+            background: var(--bg);
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
-            color: var(--fg);
-            line-height: 1.7;
+            color: var(--text);
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: var(--max-w);
-            margin: 0 auto;
-            padding: 4rem 1.5rem;
+        /* ═══ THREE.JS CANVAS ═══ */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        /* Header */
-        header { margin-bottom: 4rem; }
-
-        header h1 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 0.25rem;
+        #canvas-container canvas {
+            display: block;
         }
 
-        header p {
-            color: var(--muted);
-            font-size: 0.95rem;
+        /* ═══ NOISE OVERLAY ═══ */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
 
-        /* Sections */
-        section { margin-bottom: 3.5rem; }
+        /* ═══ GRID OVERLAY ═══ */
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(124,92,252,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,92,252,0.03) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
+        }
 
-        section h2 {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--muted);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
+        /* ═══ CONTENT WRAPPER ═══ */
+        .content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ═══ NAV ═══ */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1.25rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            background: rgba(5,5,8,0.7);
             border-bottom: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
         }
 
-        section p {
-            font-size: 1.05rem;
+        nav.scrolled {
+            padding: 0.8rem 2.5rem;
+            background: rgba(5,5,8,0.92);
+        }
+
+        .nav-logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+
+        .nav-cta {
+            padding: 0.55rem 1.4rem;
+            background: linear-gradient(135deg, var(--accent), #6040e0);
+            color: #fff !important;
+            border-radius: 6px;
+            font-weight: 600 !important;
+            transition: all 0.3s !important;
+            box-shadow: 0 0 20px rgba(124,92,252,0.3);
+        }
+
+        .nav-cta:hover {
+            box-shadow: 0 0 30px rgba(124,92,252,0.5);
+            transform: translateY(-1px);
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-2);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 2.5rem;
+            background: rgba(0,229,255,0.03);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent-2);
+            box-shadow: 0 0 10px var(--accent-2);
+            animation: pulse 1.5s infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .hero h1 .line-1 {
+            display: block;
+            color: var(--text);
+        }
+
+        .hero h1 .line-2 {
+            display: block;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 4s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-sub {
+            font-size: clamp(1.1rem, 2vw, 1.35rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.7;
+            margin-bottom: 3rem;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            animation: fadeInUp 1s ease 0.8s both;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 1rem 2.2rem;
+            background: linear-gradient(135deg, var(--accent), #5a3ae0);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: 0 0 30px rgba(124,92,252,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px rgba(124,92,252,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text);
+            border-color: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .hero-scroll {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: fadeInUp 1s ease 1.2s both;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            animation: scrollPulse 2s infinite;
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 1; height: 40px; }
+            50% { opacity: 0.3; height: 20px; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══ SECTION SHARED ═══ */
+        .section {
+            padding: 8rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
             margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        /* Stats row */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin: 1.5rem 0;
+        .section-label::before {
+            content: '';
+            width: 20px;
+            height: 1px;
+            background: var(--accent);
         }
+
+        .section-title {
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 550px;
+            line-height: 1.7;
+        }
+
+        /* ═══ STATS BAR ═══ */
+        .stats-bar {
+            padding: 0 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .stat-card {
+            padding: 2.5rem;
+            border-right: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:last-child { border-right: none; }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .stat-card:hover::before { opacity: 1; }
 
         .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1.2;
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .stat-label {
             font-size: 0.82rem;
-            color: var(--muted);
-            line-height: 1.4;
+            color: var(--text-muted);
+            line-height: 1.5;
         }
 
-        /* Services */
-        .two-col {
+        /* ═══ WHO I AM ═══ */
+        .identity-section {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .identity-inner {
+            max-width: 1200px;
+            margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin: 1rem 0;
+            gap: 4rem;
+            align-items: center;
         }
 
-        .two-col h3 {
-            font-size: 1.05rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .two-col p {
-            font-size: 0.95rem;
-            color: var(--muted);
-        }
-
-        /* Use cases */
-        .use-cases {
-            list-style: none;
-        }
-
-        .use-cases li {
-            padding: 1.25rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .use-cases li:first-child {
-            border-top: 1px solid var(--border);
-        }
-
-        .use-case-title {
-            font-weight: 500;
-            font-size: 1.05rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .use-case-desc {
-            font-size: 0.92rem;
-            color: var(--muted);
-        }
-
-        /* Contact links */
-        .contact-links {
+        .identity-visual {
+            position: relative;
+            height: 500px;
             display: flex;
-            gap: 1.5rem;
-            margin-top: 1rem;
+            align-items: center;
+            justify-content: center;
         }
 
-        .contact-links a {
-            color: #fff;
+        .orb {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%,
+                rgba(124,92,252,0.4),
+                rgba(0,229,255,0.2),
+                rgba(255,60,172,0.1),
+                transparent 70%
+            );
+            filter: blur(40px);
+            animation: orbFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        .orb-ring {
+            position: absolute;
+            border: 1px solid rgba(124,92,252,0.15);
+            border-radius: 50%;
+            animation: orbSpin 20s linear infinite;
+        }
+
+        .orb-ring:nth-child(2) { width: 350px; height: 350px; animation-duration: 25s; animation-direction: reverse; }
+        .orb-ring:nth-child(3) { width: 420px; height: 420px; animation-duration: 30s; border-color: rgba(0,229,255,0.08); }
+
+        @keyframes orbSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .identity-content .section-desc {
+            margin-bottom: 2rem;
+        }
+
+        .identity-traits {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .trait {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.01);
+            transition: all 0.3s;
+        }
+
+        .trait:hover {
+            border-color: rgba(124,92,252,0.2);
+            background: rgba(124,92,252,0.03);
+        }
+
+        .trait-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(124,92,252,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .trait-text {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
+        .trait-text strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* ═══ SERVICES ═══ */
+        .services-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        .service-card:hover {
+            border-color: rgba(124,92,252,0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .service-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(124,92,252,0.06), transparent 60%);
+            pointer-events: none;
+        }
+
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-icon.advisory { background: rgba(124,92,252,0.1); border: 1px solid rgba(124,92,252,0.15); }
+        .service-icon.implementation { background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.15); }
+
+        .service-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid rgba(124,92,252,0.2);
+            border-radius: 6px;
+            display: inline-block;
+            background: rgba(124,92,252,0.05);
+        }
+
+        .service-features {
+            list-style: none;
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .service-features li {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .service-features li::before {
+            content: '→';
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        /* ═══ CONFIDENTIALITY ═══ */
+        .confidential-section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .confidential-banner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3.5rem;
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.03), rgba(124,92,252,0.03));
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .confidential-banner::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 20%; right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+        }
+
+        .lock-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(0,229,255,0.08);
+            border: 1px solid rgba(0,229,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        .confidential-banner h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .confidential-banner p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* ═══ USE CASES ═══ */
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-top: 3rem;
+        }
+
+        .use-case-card {
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--surface);
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .use-case-card:hover {
+            border-color: rgba(124,92,252,0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .use-case-card .uc-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-2);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .use-case-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .use-case-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ═══ VENTURE STUDIO ═══ */
+        .venture-section {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .venture-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .venture-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .venture-header .section-desc {
+            margin: 0 auto;
+        }
+
+        .venture-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            position: relative;
+        }
+
+        .venture-steps::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 15%;
+            right: 15%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+            opacity: 0.3;
+        }
+
+        .venture-step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            position: relative;
+            z-index: 2;
+        }
+
+        .venture-step h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .venture-step p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ═══ CTA ═══ */
+        .cta-section {
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(124,92,252,0.08), transparent 60%);
+            pointer-events: none;
+        }
+
+        .cta-section .section-label { justify-content: center; }
+
+        .cta-section .section-title {
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .cta-section .section-desc {
+            max-width: 500px;
+            margin: 0 auto 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-buttons a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
             font-weight: 600;
             text-decoration: none;
-            border-bottom: 1px solid rgba(255,255,255,0.4);
-            padding-bottom: 2px;
+            transition: all 0.3s;
         }
 
-        .contact-links a:hover {
-            border-bottom-color: #fff;
-        }
-
-        /* CTA */
-        .cta-section {
-            background: var(--accent);
+        .cta-wa {
+            background: linear-gradient(135deg, #25d366, #128c7e);
             color: #fff;
-            padding: 2.5rem;
-            margin-top: 4rem;
+            box-shadow: 0 0 25px rgba(37,211,102,0.25);
         }
 
-        .cta-section h2 {
-            color: rgba(255,255,255,0.5);
-            border-bottom-color: rgba(255,255,255,0.15);
+        .cta-wa:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(37,211,102,0.4);
         }
 
-        .cta-section p {
-            color: rgba(255,255,255,0.85);
-        }
-
-        .cta-section a {
+        .cta-tg {
+            background: linear-gradient(135deg, #0088cc, #0066aa);
             color: #fff;
-            font-weight: 600;
+            box-shadow: 0 0 25px rgba(0,136,204,0.25);
         }
 
-        /* Footer */
+        .cta-tg:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0,136,204,0.4);
+        }
+
+        .cta-email {
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .cta-email:hover {
+            color: var(--text);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* ═══ FOOTER ═══ */
         footer {
-            margin-top: 4rem;
-            padding-top: 1.5rem;
+            padding: 3rem 2rem;
+            text-align: center;
             border-top: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 0.82rem;
         }
 
-        /* Responsive */
+        footer p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.04em;
+        }
+
+        /* ═══ SCROLL ANIMATIONS ═══ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══ MOBILE ═══ */
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-card { border-bottom: 1px solid var(--border); }
+            .services-grid { grid-template-columns: 1fr; }
+            .use-cases-grid { grid-template-columns: 1fr; }
+            .identity-inner { grid-template-columns: 1fr; }
+            .identity-visual { height: 300px; }
+            .venture-steps { grid-template-columns: 1fr; gap: 3rem; }
+            .venture-steps::before { display: none; }
+            .nav-links { display: none; }
+        }
+
         @media (max-width: 500px) {
-            .stats { grid-template-columns: 1fr; gap: 1rem; }
-            .two-col { grid-template-columns: 1fr; gap: 1.5rem; }
-            .container { padding: 2.5rem 1.25rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .hero { padding: 6rem 1.25rem 3rem; }
+            .section { padding: 4rem 1.25rem; }
+            .hero-cta-group { flex-direction: column; width: 100%; }
+            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+            .cta-buttons a { width: 100%; justify-content: center; }
+        }
+
+        /* ═══ GLITCH TEXT ═══ */
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        .glitch::before {
+            animation: glitch-1 4s infinite linear alternate-reverse;
+            clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+            -webkit-text-fill-color: var(--text);
+            background: none;
+        }
+
+        .glitch::after {
+            animation: glitch-2 4s infinite linear alternate-reverse;
+            clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+            -webkit-text-fill-color: var(--text);
+            background: none;
+        }
+
+        @keyframes glitch-1 {
+            0%, 95% { transform: none; }
+            96% { transform: translate(-2px, -1px); }
+            97% { transform: translate(2px, 1px); }
+            98% { transform: translate(-1px, 2px); }
+            99% { transform: none; }
+        }
+
+        @keyframes glitch-2 {
+            0%, 95% { transform: none; }
+            96% { transform: translate(2px, 1px); }
+            97% { transform: translate(-2px, -1px); }
+            98% { transform: translate(1px, -2px); }
+            99% { transform: none; }
+        }
+
+        /* Smooth cursor glow on cards */
+        .glow-card {
+            position: relative;
+        }
+
+        .glow-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: conic-gradient(from var(--angle, 0deg), transparent 60%, var(--accent) 80%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: -1;
+        }
+
+        .glow-card:hover::before {
+            opacity: 0.3;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>LuxAI</h1>
-            <p>AI implementation consulting for organizations ready to close the gap between AI investment and AI results.</p>
-        </header>
+    <!-- 3D Background -->
+    <div id="canvas-container"></div>
+    <div class="noise-overlay"></div>
+    <div class="grid-overlay"></div>
 
-        <section>
-            <h2>The Problem</h2>
-            <p>Organizations are spending aggressively on AI but failing to see returns. The gap between capability and deployment is the defining economic challenge of 2026.</p>
-            <div class="stats">
-                <div>
+    <div class="content">
+        <!-- NAV -->
+        <nav id="nav">
+            <div class="nav-logo">LuxAI</div>
+            <div class="nav-status">
+                <span class="status-dot"></span>
+                <span>Accepting Clients</span>
+            </div>
+            <div class="nav-links">
+                <a href="#services">Services</a>
+                <a href="#cases">Use Cases</a>
+                <a href="#process">Process</a>
+                <a href="#contact" class="nav-cta">Get Started</a>
+            </div>
+        </nav>
+
+        <!-- HERO -->
+        <section class="hero" id="hero">
+            <div class="hero-badge">AI Venture Studio &bull; Building Daily</div>
+            <h1>
+                <span class="line-1 glitch" data-text="Your Secret">Your Secret</span>
+                <span class="line-2">Weapon.</span>
+            </h1>
+            <p class="hero-sub">The wave of insane change is here. I build with AI every single day&mdash;strategy, architecture, deployment. While others theorize, I ship.</p>
+            <div class="hero-cta-group">
+                <a href="#contact" class="btn-primary">Start the Conversation <span>→</span></a>
+                <a href="#services" class="btn-secondary">See How It Works</a>
+            </div>
+            <div class="hero-scroll">
+                <span>Scroll</span>
+                <div class="scroll-line"></div>
+            </div>
+        </section>
+
+        <!-- STATS -->
+        <div class="stats-bar reveal">
+            <div class="stats-grid">
+                <div class="stat-card">
                     <div class="stat-number">56%</div>
-                    <div class="stat-label">of CEOs report getting nothing out of AI investments</div>
+                    <div class="stat-label">of CEOs report zero returns on AI investment</div>
                 </div>
-                <div>
+                <div class="stat-card">
                     <div class="stat-number">95%</div>
                     <div class="stat-label">enterprise failure rate for generative AI deployments</div>
                 </div>
-                <div>
-                    <div class="stat-number">80%</div>
-                    <div class="stat-label">of executives see no impact on employment or productivity</div>
+                <div class="stat-card">
+                    <div class="stat-number">$20K</div>
+                    <div class="stat-label">per month advisory &mdash; aligned to outcomes, not hours</div>
                 </div>
-            </div>
-            <p>Replacing a steam engine with an electric motor changes nothing if the factory floor stays the same. AI transformation requires rethinking people, process, and systems together.</p>
-        </section>
-
-        <section>
-            <h2>What We Do</h2>
-            <div class="two-col">
-                <div>
-                    <h3>Advisory</h3>
-                    <p>AI strategy for leadership teams. Where to invest, what to build vs. buy, how to restructure operations around AI capabilities, and how to navigate governance and compliance.</p>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">client confidentiality &mdash; every engagement stays secret</div>
                 </div>
-                <div>
-                    <h3>Implementation</h3>
-                    <p>Hands-on deployment from proof of concept to production. Agent orchestration, context engineering, MLOps, and the organizational change required to make AI actually work.</p>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <h2>Use Cases</h2>
-            <ul class="use-cases">
-                <li>
-                    <div class="use-case-title">Supply Chain + AI</div>
-                    <div class="use-case-desc">Demand forecasting, inventory optimization, and autonomous procurement agents that reduce carrying costs and stockouts.</div>
-                </li>
-                <li>
-                    <div class="use-case-title">Healthcare + AI</div>
-                    <div class="use-case-desc">Clinical workflow automation, diagnostic support systems, and compliance frameworks for regulated AI in patient care.</div>
-                </li>
-                <li>
-                    <div class="use-case-title">Financial Services + AI</div>
-                    <div class="use-case-desc">Risk modeling, fraud detection, automated underwriting, and AI governance that satisfies regulators.</div>
-                </li>
-                <li>
-                    <div class="use-case-title">Legal + AI</div>
-                    <div class="use-case-desc">Contract analysis, due diligence automation, and document intelligence that reduces review cycles from weeks to hours.</div>
-                </li>
-                <li>
-                    <div class="use-case-title">AI Governance &amp; EU AI Act Readiness</div>
-                    <div class="use-case-desc">Risk classification, compliance documentation, and governance frameworks ahead of enforcement in August 2026.</div>
-                </li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>Approach</h2>
-            <p>We work on outcomes, not hours. Pricing is aligned to the value created&mdash;measured in cost savings, speed gains, or new capabilities delivered.</p>
-            <p>Every engagement starts with a focused diagnostic: where AI creates the most impact in your context, what's blocking deployment, and the fastest path to production value.</p>
-        </section>
-
-        <div class="cta-section">
-            <h2>Start a Conversation</h2>
-            <p>If your AI investments aren't delivering, the problem is almost certainly implementation, not technology. Let's talk about where you are and what's possible.</p>
-            <div class="contact-links">
-                <a href="https://wa.me/1XXXXXXXXXX">WhatsApp</a>
-                <a href="https://t.me/luxai">Telegram</a>
             </div>
         </div>
 
+        <!-- IDENTITY -->
+        <section class="identity-section" id="about">
+            <div class="identity-inner">
+                <div class="identity-visual reveal">
+                    <div class="orb"></div>
+                    <div class="orb-ring"></div>
+                    <div class="orb-ring"></div>
+                    <div class="orb-ring"></div>
+                </div>
+                <div class="identity-content reveal">
+                    <div class="section-label">Who I Am</div>
+                    <h2 class="section-title">I Build With AI.<br>Every. Single. Day.</h2>
+                    <p class="section-desc">I run an AI venture studio. I don't just advise&mdash;I build production systems, ship AI products, and operate at the bleeding edge. When I sit across from your leadership team, I'm bringing hands-on experience from the trenches, not slides from a research report.</p>
+                    <div class="identity-traits">
+                        <div class="trait">
+                            <div class="trait-icon">⚡</div>
+                            <div class="trait-text"><strong>AI Venture Studio Operator</strong> &mdash; Building and shipping AI products continuously</div>
+                        </div>
+                        <div class="trait">
+                            <div class="trait-icon">🧠</div>
+                            <div class="trait-text"><strong>Hands-on Builder</strong> &mdash; Agent orchestration, context engineering, full-stack AI</div>
+                        </div>
+                        <div class="trait">
+                            <div class="trait-icon">🔒</div>
+                            <div class="trait-text"><strong>Complete Discretion</strong> &mdash; Your identity, strategy, and data stay invisible</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SERVICES -->
+        <section class="section" id="services">
+            <div class="reveal">
+                <div class="section-label">Services</div>
+                <h2 class="section-title">Advisory &<br>Implementation</h2>
+                <p class="section-desc">Two ways to work together. Both designed to close the gap between AI investment and AI results.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card reveal">
+                    <div class="service-icon advisory">🎯</div>
+                    <h3>Advisory</h3>
+                    <p>Embedded AI strategy for your leadership team. I become your unfair advantage&mdash;the person who's building with AI daily, guiding your highest-stakes decisions.</p>
+                    <div class="service-price">$20K / month</div>
+                    <ul class="service-features">
+                        <li>AI strategy & roadmap development</li>
+                        <li>Build vs. buy decisions</li>
+                        <li>Operations restructuring for AI</li>
+                        <li>Governance & compliance navigation</li>
+                        <li>Vendor & tool evaluation</li>
+                        <li>Board & investor AI narratives</li>
+                    </ul>
+                </div>
+                <div class="service-card reveal">
+                    <div class="service-icon implementation">🚀</div>
+                    <h3>Implementation</h3>
+                    <p>Hands-on deployment from proof of concept to production. Not theory. Not reports. Working AI systems that generate measurable value.</p>
+                    <div class="service-price">Scoped per engagement</div>
+                    <ul class="service-features">
+                        <li>Agent & workflow automation</li>
+                        <li>Context engineering & RAG</li>
+                        <li>Custom model fine-tuning</li>
+                        <li>MLOps & production pipelines</li>
+                        <li>Organizational change management</li>
+                        <li>Team training & upskilling</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONFIDENTIALITY -->
+        <div class="confidential-section">
+            <div class="confidential-banner reveal">
+                <div class="lock-icon">🔐</div>
+                <h2>Total Confidentiality. No Exceptions.</h2>
+                <p>Every client's identity, strategy, and data stays completely secret. No case studies. No name-dropping. No logos on a website. You get a silent partner who makes you dangerous&mdash;and nobody else knows why.</p>
+            </div>
+        </div>
+
+        <!-- USE CASES -->
+        <section class="section" id="cases">
+            <div class="reveal">
+                <div class="section-label">Use Cases</div>
+                <h2 class="section-title">Where AI Hits<br>The Hardest</h2>
+                <p class="section-desc">Industries where the delta between AI-enabled and AI-ignorant is becoming existential.</p>
+            </div>
+            <div class="use-cases-grid">
+                <div class="use-case-card reveal">
+                    <span class="uc-tag">Supply Chain</span>
+                    <h3>Autonomous Procurement</h3>
+                    <p>Demand forecasting, inventory optimization, and AI agents that reduce carrying costs and eliminate stockouts.</p>
+                </div>
+                <div class="use-case-card reveal">
+                    <span class="uc-tag">Healthcare</span>
+                    <h3>Clinical AI Systems</h3>
+                    <p>Workflow automation, diagnostic support, and compliance-ready AI for regulated patient care environments.</p>
+                </div>
+                <div class="use-case-card reveal">
+                    <span class="uc-tag">Financial Services</span>
+                    <h3>Intelligent Risk & Compliance</h3>
+                    <p>Real-time risk modeling, fraud detection, automated underwriting, and AI governance that satisfies regulators.</p>
+                </div>
+                <div class="use-case-card reveal">
+                    <span class="uc-tag">Legal</span>
+                    <h3>Document Intelligence</h3>
+                    <p>Contract analysis, due diligence automation, and review cycles compressed from weeks to hours.</p>
+                </div>
+                <div class="use-case-card reveal">
+                    <span class="uc-tag">Operations</span>
+                    <h3>Process Automation</h3>
+                    <p>End-to-end workflow agents that eliminate manual bottlenecks and scale operations without headcount.</p>
+                </div>
+                <div class="use-case-card reveal">
+                    <span class="uc-tag">Governance</span>
+                    <h3>EU AI Act Readiness</h3>
+                    <p>Risk classification, compliance documentation, and governance frameworks ahead of August 2026 enforcement.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROCESS -->
+        <section class="venture-section" id="process">
+            <div class="venture-inner">
+                <div class="venture-header reveal">
+                    <div class="section-label" style="justify-content:center;">Process</div>
+                    <h2 class="section-title">From Signal to System</h2>
+                    <p class="section-desc">A focused, high-velocity engagement model built for leaders who move fast.</p>
+                </div>
+                <div class="venture-steps">
+                    <div class="venture-step reveal">
+                        <div class="step-number">01</div>
+                        <h3>Diagnostic</h3>
+                        <p>A focused assessment of where AI creates the most impact in your context. We identify what's blocking deployment and map the fastest path to production value.</p>
+                    </div>
+                    <div class="venture-step reveal">
+                        <div class="step-number">02</div>
+                        <h3>Architecture</h3>
+                        <p>Strategy and technical architecture designed for your reality&mdash;your stack, your team, your constraints. No generic frameworks. Built to ship.</p>
+                    </div>
+                    <div class="venture-step reveal">
+                        <div class="step-number">03</div>
+                        <h3>Deploy & Scale</h3>
+                        <p>Production deployment, monitoring, and iteration. We measure outcomes, not activity. Working systems that compound value over time.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section" id="contact">
+            <div class="reveal">
+                <div class="section-label">Let's Talk</div>
+                <h2 class="section-title">The Gap Between You<br>And AI That Works<br>Is One Conversation.</h2>
+                <p class="section-desc">If your AI investments aren't delivering, the problem is implementation, not technology. I'm the person who fixes that.</p>
+                <div class="cta-buttons">
+                    <a href="https://wa.me/1XXXXXXXXXX" class="cta-wa">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        WhatsApp
+                    </a>
+                    <a href="https://t.me/luxai" class="cta-tg">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        Telegram
+                    </a>
+                    <a href="mailto:hello@luxai.com" class="cta-email">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        Email
+                    </a>
+                </div>
+            </div>
+        </section>
+
         <footer>
-            <p>&copy; 2026 LuxAI. All rights reserved.</p>
+            <p>&copy; 2026 LuxAI. All rights reserved. Every engagement is confidential.</p>
         </footer>
     </div>
+
+    <!-- THREE.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+    (function() {
+        // ═══ THREE.JS 3D PARTICLE FIELD ═══
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        camera.position.z = 50;
+
+        // Particle system
+        const particleCount = 2000;
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+        const velocities = [];
+
+        const palette = [
+            new THREE.Color(0x7c5cfc),
+            new THREE.Color(0x00e5ff),
+            new THREE.Color(0xff3cac),
+            new THREE.Color(0x5a3ae0),
+        ];
+
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 120;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+
+            const color = palette[Math.floor(Math.random() * palette.length)];
+            colors[i * 3] = color.r;
+            colors[i * 3 + 1] = color.g;
+            colors[i * 3 + 2] = color.b;
+
+            sizes[i] = Math.random() * 2 + 0.5;
+
+            velocities.push({
+                x: (Math.random() - 0.5) * 0.02,
+                y: (Math.random() - 0.5) * 0.02,
+                z: (Math.random() - 0.5) * 0.01,
+            });
+        }
+
+        const particleGeometry = new THREE.BufferGeometry();
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+        const particleMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                uTime: { value: 0 },
+                uMouse: { value: new THREE.Vector2(0, 0) },
+            },
+            vertexShader: `
+                attribute float size;
+                attribute vec3 color;
+                varying vec3 vColor;
+                varying float vAlpha;
+                uniform float uTime;
+                uniform vec2 uMouse;
+
+                void main() {
+                    vColor = color;
+                    vec3 pos = position;
+                    pos.x += sin(uTime * 0.3 + position.y * 0.05) * 1.5;
+                    pos.y += cos(uTime * 0.2 + position.x * 0.05) * 1.5;
+                    pos.z += sin(uTime * 0.15 + position.x * 0.03) * 2.0;
+
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    float dist = length(mvPosition.xyz);
+                    vAlpha = smoothstep(100.0, 20.0, dist) * 0.6;
+
+                    gl_PointSize = size * (40.0 / -mvPosition.z);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                varying float vAlpha;
+
+                void main() {
+                    float d = length(gl_PointCoord - vec2(0.5));
+                    if (d > 0.5) discard;
+                    float alpha = smoothstep(0.5, 0.1, d) * vAlpha;
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+
+        // Wireframe torus knot
+        const torusGeometry = new THREE.TorusKnotGeometry(12, 3, 100, 16);
+        const torusMaterial = new THREE.MeshBasicMaterial({
+            color: 0x7c5cfc,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.04,
+        });
+        const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+        torus.position.set(25, -10, -30);
+        scene.add(torus);
+
+        // Wireframe icosahedron
+        const icoGeometry = new THREE.IcosahedronGeometry(8, 1);
+        const icoMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00e5ff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.05,
+        });
+        const ico = new THREE.Mesh(icoGeometry, icoMaterial);
+        ico.position.set(-30, 15, -20);
+        scene.add(ico);
+
+        // Connection lines
+        const lineCount = 100;
+        const linePositions = new Float32Array(lineCount * 6);
+        const lineGeometry = new THREE.BufferGeometry();
+        lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x7c5cfc,
+            transparent: true,
+            opacity: 0.06,
+        });
+        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        scene.add(lines);
+
+        // Mouse tracking
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            targetX = (e.clientX / window.innerWidth - 0.5) * 2;
+            targetY = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        // Scroll tracking
+        let scrollY = 0;
+        window.addEventListener('scroll', () => {
+            scrollY = window.pageYOffset;
+        });
+
+        // Animation loop
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            mouseX += (targetX - mouseX) * 0.05;
+            mouseY += (targetY - mouseY) * 0.05;
+
+            particleMaterial.uniforms.uTime.value = time;
+            particleMaterial.uniforms.uMouse.value.set(mouseX, mouseY);
+
+            // Rotate camera slightly with mouse
+            camera.position.x = mouseX * 5;
+            camera.position.y = -mouseY * 3 - scrollY * 0.01;
+            camera.lookAt(0, -scrollY * 0.01, 0);
+
+            // Animate geometries
+            torus.rotation.x = time * 0.1;
+            torus.rotation.y = time * 0.15;
+            ico.rotation.x = time * 0.08;
+            ico.rotation.z = time * 0.12;
+
+            // Update particle velocities
+            const posArr = particleGeometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                posArr[i * 3] += velocities[i].x;
+                posArr[i * 3 + 1] += velocities[i].y;
+                posArr[i * 3 + 2] += velocities[i].z;
+
+                // Wrap around
+                if (posArr[i * 3] > 60) posArr[i * 3] = -60;
+                if (posArr[i * 3] < -60) posArr[i * 3] = 60;
+                if (posArr[i * 3 + 1] > 60) posArr[i * 3 + 1] = -60;
+                if (posArr[i * 3 + 1] < -60) posArr[i * 3 + 1] = 60;
+            }
+            particleGeometry.attributes.position.needsUpdate = true;
+
+            // Update connection lines between nearby particles
+            let lineIdx = 0;
+            const maxDist = 15;
+            for (let i = 0; i < particleCount && lineIdx < lineCount; i += 10) {
+                for (let j = i + 10; j < particleCount && lineIdx < lineCount; j += 10) {
+                    const dx = posArr[i * 3] - posArr[j * 3];
+                    const dy = posArr[i * 3 + 1] - posArr[j * 3 + 1];
+                    const dz = posArr[i * 3 + 2] - posArr[j * 3 + 2];
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    if (dist < maxDist) {
+                        linePositions[lineIdx * 6] = posArr[i * 3];
+                        linePositions[lineIdx * 6 + 1] = posArr[i * 3 + 1];
+                        linePositions[lineIdx * 6 + 2] = posArr[i * 3 + 2];
+                        linePositions[lineIdx * 6 + 3] = posArr[j * 3];
+                        linePositions[lineIdx * 6 + 4] = posArr[j * 3 + 1];
+                        linePositions[lineIdx * 6 + 5] = posArr[j * 3 + 2];
+                        lineIdx++;
+                    }
+                }
+            }
+            lineGeometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ═══ SCROLL ANIMATIONS ═══
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, i * 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        reveals.forEach(el => observer.observe(el));
+
+        // ═══ NAV SCROLL EFFECT ═══
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // ═══ CARD MOUSE GLOW ═══
+        document.querySelectorAll('.service-card, .use-case-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--mx', x + '%');
+                card.style.setProperty('--my', y + '%');
+            });
+        });
+
+        // ═══ SMOOTH SCROLL ═══
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(anchor.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    })();
+    </script>
 </body>
 </html>
